@@ -1,0 +1,1 @@
+idf_component_register(SRCS "main.c" "missileCommandControl.c" "missile.c" "plane.c" INCLUDE_DIRS "." "../components")
