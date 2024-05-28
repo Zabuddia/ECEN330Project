@@ -42,7 +42,7 @@ void controller_tick() {
                 controller_state = CONTROLLER_STATE_UP;
             } else if (!pin_get_level(BTN_B)) {
                 controller_state = CONTROLLER_STATE_DOWN;
-            } else if (pin_get_level(BTN_START)) {
+            } else if (!pin_get_level(BTN_START)) {
                 controller_state = CONTROLLER_STATE_CHANGE_SPEED;
             } else if (!globals_get_in_controller()) {
                 controller_state = CONTROLLER_STATE_WAITING;
