@@ -7,6 +7,7 @@
 #include <math.h>
 #include "lcd.h"
 #include "config.h"
+#include "globals.h"
 
 // The same missile structure is used for all missiles in the game.
 // All state variables for a missile are contained in the missile structure.

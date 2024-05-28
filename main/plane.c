@@ -93,14 +93,14 @@ void plane_tick(void) {
             break;
         case MOVING:
             plane.x -= CONFIG_PLANE_DISTANCE_PER_TICK;
-            lcdFillArrow(&dev, plane.x, plane.y, plane.x - CONFIG_PLANE_WIDTH, plane.y, CONFIG_PLANE_HEIGHT, CONFIG_COLOR_PLANE);
+            lcdFillArrow(&dev, plane.x, plane.y, plane.x - CONFIG_PLANE_WIDTH, plane.y, CONFIG_PLANE_HEIGHT, globals_get_plane_color());
             break;
         case SHOOTING:
             missile_init_plane(plane.missile, plane.x, plane.y);
             break;
         case MOVING_AFTER_SHOOTING:
             plane.x -= CONFIG_PLANE_DISTANCE_PER_TICK;
-            lcdFillArrow(&dev, plane.x, plane.y, plane.x - CONFIG_PLANE_WIDTH, plane.y, CONFIG_PLANE_HEIGHT, CONFIG_COLOR_PLANE);
+            lcdFillArrow(&dev, plane.x, plane.y, plane.x - CONFIG_PLANE_WIDTH, plane.y, CONFIG_PLANE_HEIGHT, globals_get_plane_color());
             break;
         case EXPLODING:
             break;

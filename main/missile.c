@@ -96,13 +96,13 @@ uint16_t determine_color(missile_t *missile) {
     // Switch statement to determine the color based on the type
     switch (missile->type) {
         case MISSILE_TYPE_ENEMY:
-            return CONFIG_COLOR_ENEMY_MISSILE;
+            return globals_get_enemy_color();
             break;
         case MISSILE_TYPE_PLANE:
-            return CONFIG_COLOR_PLANE_MISSILE;
+            return globals_get_plane_missile_color();
             break;
         case MISSILE_TYPE_PLAYER:
-            return CONFIG_COLOR_PLAYER_MISSILE;
+            return globals_get_player_color();
             break;
     }
     return CONFIG_COLOR_ENEMY_MISSILE;

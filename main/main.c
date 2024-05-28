@@ -1,21 +1,29 @@
 #include <stdio.h>
+#include <string.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
 #include "driver/gptimer.h"
 #include "driver/rtc_io.h"
-#include "esp_timer.h"
+#include "driver/uart.h"
 
 #include "config.h"
 #include "btn.h"
 #include "lcd.h"
 #include "cursor.h"
+#include "joy.h"
 #include "pin.h"
 #include "missileCommandControl.h"
+#include "interface.h"
+#include "menu.h"
+#include "settings.h"
+#include "timer.h"
+#include "controller.h"
 
-// The update period as an integer in ms
-#define PER_MS ((uint32_t)(CONFIG_GAME_TIMER_PERIOD*1000))
-#define TIME_OUT 500 // ms
+#define RESOLUTION  1000000
+#define ALARM_COUNT (RESOLUTION/20)
 
 static const char* TAG = "main";
 
@@ -43,7 +51,7 @@ void configure_and_start_gptimer() {
 	};
     gptimer_register_event_callbacks(gptimer, &cbs, NULL);
 
-	// Configuring the alarm to trigger every 40ms
+	// Configuring the alarm to trigger every 50ms
 	gptimer_alarm_config_t alarm_config = {
 	 	.reload_count = 0,
 	 	.alarm_count = ALARM_COUNT,
@@ -60,11 +68,9 @@ void app_main() {
     interrupt_flag = false;
 
     lcdInit(&dev);
-    lcdFrameEnable(&dev);
+    //lcdFrameEnable(&dev);
     lcdFillScreen(&dev, CONFIG_COLOR_BACKGROUND);
     lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);
-
-    cursor_init(PER_MS);
 
     // Configure I/O pins for buttons
 	pin_reset(BTN_A);
@@ -82,12 +88,24 @@ void app_main() {
 
     configure_and_start_gptimer();
 
+    interface_init();
+    menu_init();
+    settings_init();
     gameControl_init();
+    timer_init();
+    controller_init();
+
 
     while (1) {
         while (!interrupt_flag) ;
         interrupt_flag = false;
         lcdFillScreen(&dev, CONFIG_COLOR_BACKGROUND);
+        interface_tick();
+        menu_tick();
+        settings_tick();
         gameControl_tick();
+        timer_tick();
+        controller_tick();
+        //lcdWriteFrame(&dev);
     }
 }

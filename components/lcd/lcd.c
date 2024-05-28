@@ -1,13 +1,14 @@
 /* Modified from: https://github.com/nopnop2002/esp-idf-st7789 */
 
-#include <string.h> // strlen
+#include <string.h> // strlen, memcpy
 #include <math.h> // cosf, sinf
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include <driver/spi_master.h>
-#include <driver/gpio.h>
+#include "driver/spi_master.h"
+#include "driver/gpio.h"
+#include "esp_heap_caps.h"
 #include "esp_log.h"
 
 #include "lcd.h"
@@ -57,14 +58,12 @@
 #define HOST_ID SPI2_HOST
 #endif
 
-#ifndef CONFIG_FRAME_BUFFER
-#define CONFIG_FRAME_BUFFER 0
-#endif
-
 #define SPI_DEFAULT_FREQUENCY SPI_MASTER_FREQ_40M; // MHz
 #define swap(T,a,b) {T t = (a); (a) = (b); (b) = t;}
 
 #define M_PIf 3.14159265358979323846f
+
+#define SWAP16(c) (((c) << 8) | ((c) >> 8))
 
 static const int32_t SPI_Command_Mode = 0;
 static const int32_t SPI_Data_Mode = 1;
@@ -82,6 +81,9 @@ static void delayMS(int32_t ms) {
 }
 
 /* * * * * * * * * * SPI * * * * * * * * * */
+
+#define BUF_LEN 512
+static uint16_t buffer[BUF_LEN];
 
 static void spi_master_init(TFT_t *dev, int16_t GPIO_MOSI, int16_t GPIO_SCLK, int16_t GPIO_CS, int16_t GPIO_DC, int16_t GPIO_RESET, int16_t GPIO_BL)
 {
@@ -160,7 +162,7 @@ static void spi_master_init(TFT_t *dev, int16_t GPIO_MOSI, int16_t GPIO_SCLK, in
 	dev->_SPIHandle = handle;
 }
 
-static bool spi_master_write_byte(spi_device_handle_t SPIHandle, const uint8_t* Data, size_t DataLength)
+static bool spi_master_write_bytes(spi_device_handle_t SPIHandle, const uint8_t* Data, size_t DataLength)
 {
 	spi_transaction_t SPITransaction;
 	esp_err_t ret;
@@ -185,7 +187,7 @@ static bool spi_master_write_command(TFT_t *dev, uint8_t cmd)
 	static uint8_t Byte = 0;
 	Byte = cmd;
 	gpio_set_level( dev->_dc, SPI_Command_Mode );
-	return spi_master_write_byte( dev->_SPIHandle, &Byte, 1 );
+	return spi_master_write_bytes( dev->_SPIHandle, &Byte, 1 );
 }
 
 static bool spi_master_write_data_byte(TFT_t *dev, uint8_t data)
@@ -193,7 +195,7 @@ static bool spi_master_write_data_byte(TFT_t *dev, uint8_t data)
 	static uint8_t Byte = 0;
 	Byte = data;
 	gpio_set_level( dev->_dc, SPI_Data_Mode );
-	return spi_master_write_byte( dev->_SPIHandle, &Byte, 1 );
+	return spi_master_write_bytes( dev->_SPIHandle, &Byte, 1 );
 }
 
 #if 0
@@ -203,7 +205,7 @@ static bool spi_master_write_data_word(TFT_t *dev, uint16_t data)
 	Byte[0] = (data >> 8) & 0xFF;
 	Byte[1] = data & 0xFF;
 	gpio_set_level( dev->_dc, SPI_Data_Mode );
-	return spi_master_write_byte( dev->_SPIHandle, Byte, 2);
+	return spi_master_write_bytes( dev->_SPIHandle, Byte, 2);
 }
 #endif
 
@@ -215,16 +217,21 @@ static bool spi_master_write_addr(TFT_t *dev, uint16_t addr1, uint16_t addr2)
 	Byte[2] = (addr2 >> 8) & 0xFF;
 	Byte[3] = addr2 & 0xFF;
 	gpio_set_level( dev->_dc, SPI_Data_Mode );
-	return spi_master_write_byte( dev->_SPIHandle, Byte, 4);
+	return spi_master_write_bytes( dev->_SPIHandle, Byte, 4);
 }
 
-inline static bool spi_master_write_color(TFT_t *dev, uint16_t color, uint16_t size)
+// size is number of elements, not bytes.
+inline static bool spi_master_write_color(TFT_t *dev, uint16_t color, size_t size)
 {
-	uint16_t temp = SPI_SWAP_DATA_TX(color, 16);
-	static uint16_t buffer[512];
-	for(int32_t i=0;i<size;i++) buffer[i] = temp;
-	gpio_set_level( dev->_dc, SPI_Data_Mode );
-	return spi_master_write_byte( dev->_SPIHandle, (const uint8_t *)buffer, size*2);
+	uint16_t temp = SWAP16(color);
+	size_t n = (size < BUF_LEN) ? size : BUF_LEN;
+	for (size_t i = 0; i < n; i++) buffer[i] = temp;
+	gpio_set_level(dev->_dc, SPI_Data_Mode);
+	while (size) {
+		spi_master_write_bytes(dev->_SPIHandle, (uint8_t *)buffer, n*sizeof(uint16_t));
+		size -= n;
+	}
+	return true;
 }
 
 #if 0 // original
@@ -237,7 +244,7 @@ static bool spi_master_write_color(TFT_t *dev, uint16_t color, uint16_t size)
 		Byte[index++] = color & 0xFF;
 	}
 	gpio_set_level( dev->_dc, SPI_Data_Mode );
-	return spi_master_write_byte( dev->_SPIHandle, Byte, size*2);
+	return spi_master_write_bytes( dev->_SPIHandle, Byte, size*2);
 }
 #endif
 
@@ -247,7 +254,7 @@ static bool spi_master_write_color(TFT_t *dev, uint16_t color, uint16_t size)
 	color = SPI_SWAP_DATA_TX(color, 16);
 	gpio_set_level( dev->_dc, SPI_Data_Mode );
 	while (size--) {
-		spi_master_write_byte( dev->_SPIHandle, (const uint8_t *)&color, 2);
+		spi_master_write_bytes( dev->_SPIHandle, (const uint8_t *)&color, 2);
 	}
 	return 0;
 }
@@ -265,7 +272,8 @@ static bool spi_master_write_color(TFT_t *dev, uint16_t color, uint16_t size)
   }
 #endif
 
-// Add 202001
+#if 0
+// Add 202001: size is number of elements, not bytes. size limited to 512
 inline static bool spi_master_write_colors(TFT_t *dev, uint16_t *colors, uint16_t size)
 {
 	static uint8_t Byte[1024];
@@ -275,14 +283,36 @@ inline static bool spi_master_write_colors(TFT_t *dev, uint16_t *colors, uint16_
 		Byte[index++] = colors[i] & 0xFF;
 	}
 	gpio_set_level( dev->_dc, SPI_Data_Mode );
-	return spi_master_write_byte( dev->_SPIHandle, Byte, size*2);
+	return spi_master_write_bytes( dev->_SPIHandle, Byte, size*2);
 }
+#endif
+
+// size is number of elements, not bytes.
+inline static bool spi_master_write_colors(TFT_t *dev, uint16_t *colors, size_t size)
+{
+	gpio_set_level(dev->_dc, SPI_Data_Mode);
+	while (size) {
+		size_t n = (size < BUF_LEN) ? size : BUF_LEN;
+		for (size_t i = 0; i < n; i++) buffer[i] = SWAP16(colors[i]);
+		spi_master_write_bytes(dev->_SPIHandle, (uint8_t *)buffer, n*sizeof(uint16_t));
+		colors += n;
+		size -= n;
+	}
+	return true;
+}
+
 
 /* * * * * * * * * * LCD * * * * * * * * * */
 
 void lcdInit(TFT_t *dev)
 {
-	spi_master_init(dev, CONFIG_MOSI_GPIO, CONFIG_SCLK_GPIO, CONFIG_CS_GPIO,CONFIG_DC_GPIO, CONFIG_RESET_GPIO, CONFIG_BL_GPIO);
+	spi_master_init(dev,
+		CONFIG_MOSI_GPIO,
+		CONFIG_SCLK_GPIO,
+		CONFIG_CS_GPIO,
+		CONFIG_DC_GPIO,
+		CONFIG_RESET_GPIO,
+		CONFIG_BL_GPIO);
 
 	dev->_width = CONFIG_WIDTH;
 	dev->_height = CONFIG_HEIGHT;
@@ -292,16 +322,18 @@ void lcdInit(TFT_t *dev)
 	dev->_font_size = 1;
 	dev->_font_back_en = false;
 	dev->_font_back_color = BLACK;
+	dev->_use_frame_buffer = false;
+	dev->_frame_buffer = NULL;
 
 	spi_master_write_command(dev, 0x01);	// Software Reset
-	delayMS(150);
+	delayMS(5); // 150
 
 	spi_master_write_command(dev, 0x11);	// Sleep Out
-	delayMS(255);
+	delayMS(5); // 255
 
 	spi_master_write_command(dev, 0x3A);	// Interface Pixel Format
 	spi_master_write_data_byte(dev, 0x55);
-	delayMS(10);
+	// delayMS(10);
 
 	spi_master_write_command(dev, 0x36);	// Memory Data Access Control
 	spi_master_write_data_byte(dev, 0x08);  // 0x00
@@ -375,28 +407,34 @@ void lcdInit(TFT_t *dev)
 	// delayMS(10);
 
 	spi_master_write_command(dev, 0x29);	//Display ON
-	delayMS(255);
+	lcdFillScreen(dev, BLACK); // assume _use_frame_buffer is false
+	// delayMS(255);
 
 	if(dev->_bl >= 0) {
 		gpio_set_level( dev->_bl, 1 );
 	}
-
-	dev->_use_frame_buffer = false;
-#if CONFIG_FRAME_BUFFER
-	dev->_frame_buffer = heap_caps_malloc(sizeof(uint16_t)*width*height, MALLOC_CAP_DMA);
-	if (dev->_frame_buffer == NULL) {
-		ESP_LOGE(TAG, "heap_caps_malloc fail");
-	} else {
-		ESP_LOGI(TAG, "heap_caps_malloc success");
-		dev->_use_frame_buffer = true;
-	}
-#endif
 }
 
 // Fill screen
 // color:color
 void lcdFillScreen(TFT_t *dev, uint16_t color) {
-	lcdFillRect(dev, 0, 0, dev->_width-1, dev->_height-1, color);
+	if (dev->_use_frame_buffer) {
+		uint16_t *ptr = dev->_frame_buffer;
+		size_t len = dev->_width*dev->_height;
+		*ptr++ = color; len--;
+		while (len) {
+			size_t n = (len < ptr - dev->_frame_buffer) ? len : ptr - dev->_frame_buffer;
+			memcpy(ptr, dev->_frame_buffer, n*sizeof(uint16_t));
+			ptr += n; len -= n;
+		}
+	} else {
+		spi_master_write_command(dev, 0x2A);	// set column(x) address
+		spi_master_write_addr(dev, 0, dev->_width-1);
+		spi_master_write_command(dev, 0x2B);	// set Page(y) address
+		spi_master_write_addr(dev, 0, dev->_height-1);
+		spi_master_write_command(dev, 0x2C);	// Memory Write
+		spi_master_write_color(dev, color, dev->_width*dev->_height);
+	}
 }
 
 // Draw pixel
@@ -404,8 +442,8 @@ void lcdFillScreen(TFT_t *dev, uint16_t color) {
 // y:Y coordinate
 // color:color
 void lcdDrawPixel(TFT_t *dev, int32_t x, int32_t y, uint16_t color){
-	if (x >= dev->_width) return;
-	if (y >= dev->_height) return;
+	if (x < 0 || x >= dev->_width) return; // off screen
+	if (y < 0 || y >= dev->_height) return;
 
 	if (dev->_use_frame_buffer) {
 		dev->_frame_buffer[y*dev->_width+x] = color;
@@ -429,8 +467,10 @@ void lcdDrawPixel(TFT_t *dev, int32_t x, int32_t y, uint16_t color){
 // size:Number of colors
 // colors:colors
 void lcdDrawMultiPixels(TFT_t *dev, int32_t x, int32_t y, int32_t size, uint16_t *colors) {
-	if (x+size > dev->_width) return;
-	if (y >= dev->_height) return;
+	if (x+size <= 0 || x >= dev->_width) return; // off screen
+	if (y < 0 || y >= dev->_height) return;
+	if (x < 0) {size += x; x = 0;} // clip
+	if (x+size > dev->_width) size = dev->_width-x;
 
 	if (dev->_use_frame_buffer) {
 		int32_t _x1 = x;
@@ -460,8 +500,10 @@ void lcdDrawMultiPixels(TFT_t *dev, int32_t x, int32_t y, int32_t size, uint16_t
 // w:width of line
 // color:color
 void lcdDrawHLine(TFT_t *dev, int32_t x, int32_t y, int32_t w, uint16_t color) {
-	if (x+w > dev->_width) return;
-	if (y >= dev->_height) return;
+	if (x+w <= 0 || x >= dev->_width) return; // off screen
+	if (y < 0 || y >= dev->_height) return;
+	if (x < 0) {w += x; x = 0;} // clip
+	if (x+w > dev->_width) w = dev->_width-x;
 
 	if (dev->_use_frame_buffer) {
 		int32_t _x1 = x;
@@ -491,9 +533,10 @@ void lcdDrawHLine(TFT_t *dev, int32_t x, int32_t y, int32_t w, uint16_t color) {
 // color:color
 void lcdDrawVLine(TFT_t *dev, int32_t x, int32_t y, int32_t h, uint16_t color) {
 	int32_t y2 = y+h-1;
-	if (x  >= dev->_width) return;
-	if (y  >= dev->_height) return;
-	if (y2 >= dev->_height) y2=dev->_height-1;
+	if (x < 0 || x  >= dev->_width) return; // off screen
+	if (y2 < 0 || y >= dev->_height) return;
+	if (y < 0) y = 0; // clip
+	if (y2 >= dev->_height) y2 = dev->_height-1;
 
 	ESP_LOGD(TAG,"offset(x)=%ld offset(y)=%ld",dev->_offsetx,dev->_offsety);
 
@@ -504,7 +547,7 @@ void lcdDrawVLine(TFT_t *dev, int32_t x, int32_t y, int32_t h, uint16_t color) {
 	} else {
 		int32_t _x1 =  x  + dev->_offsetx;
 		int32_t _x2 = _x1 + dev->_offsetx;
-		int32_t _y1 =  y + dev->_offsety;
+		int32_t _y1 =  y  + dev->_offsety;
 		int32_t _y2 =  y2 + dev->_offsety;
 		int32_t size = _y2-_y1+1;
 
@@ -673,29 +716,38 @@ void lcdDrawLine(TFT_t *dev, int32_t x0, int32_t y0, int32_t x1, int32_t y1, uin
   }
 }
 
-// Draw rectangle
+// Draw rectangle - assume x1 <= x2 && y1 <= y2
 // x1:Start X coordinate
 // y1:Start Y coordinate
 // x2:End	X coordinate
 // y2:End	Y coordinate
 // color:color
 void lcdDrawRect(TFT_t *dev, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint16_t color) {
+#if 1
+	lcdDrawHLine(dev, x1, y1, x2-x1+1, color);
+	lcdDrawVLine(dev, x2, y1, y2-y1+1, color);
+	lcdDrawHLine(dev, x1, y2, x2-x1+1, color);
+	lcdDrawVLine(dev, x1, y1, y2-y1+1, color);
+#else
 	lcdDrawLine(dev, x1, y1, x2, y1, color);
 	lcdDrawLine(dev, x2, y1, x2, y2, color);
 	lcdDrawLine(dev, x2, y2, x1, y2, color);
 	lcdDrawLine(dev, x1, y2, x1, y1, color);
+#endif
 }
 
-// Draw rectangle of filling
+// Draw rectangle of filling - assume x1 <= x2 && y1 <= y2
 // x1:Start X coordinate
 // y1:Start Y coordinate
 // x2:End X coordinate
 // y2:End Y coordinate
 // color:color
 void lcdFillRect(TFT_t *dev, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint16_t color) {
-	if (x1 >= dev->_width) return;
+	if (x2 < 0 || x1 >= dev->_width) return; // off screen
+	if (y2 < 0 || y1 >= dev->_height) return;
+	if (x1 < 0) x1 = 0; // clip
 	if (x2 >= dev->_width) x2=dev->_width-1;
-	if (y1 >= dev->_height) return;
+	if (y1 < 0) y1 = 0;
 	if (y2 >= dev->_height) y2=dev->_height-1;
 
 	ESP_LOGD(TAG,"offset(x)=%ld offset(y)=%ld",dev->_offsetx,dev->_offsety);
@@ -711,16 +763,14 @@ void lcdFillRect(TFT_t *dev, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uin
 		int32_t _x2 = x2 + dev->_offsetx;
 		int32_t _y1 = y1 + dev->_offsety;
 		int32_t _y2 = y2 + dev->_offsety;
-		int32_t size = _x2-_x1+1;
+		int32_t size = (_x2-_x1+1)*(_y2-_y1+1);
 
 		spi_master_write_command(dev, 0x2A);	// set column(x) address
 		spi_master_write_addr(dev, _x1, _x2);
 		spi_master_write_command(dev, 0x2B);	// set Page(y) address
 		spi_master_write_addr(dev, _y1, _y2);
 		spi_master_write_command(dev, 0x2C);	// Memory Write
-		for(int32_t i=_y1;i<=_y2;i++){
-			spi_master_write_color(dev, color, size);
-		}
+		spi_master_write_color(dev, color, size);
 	}
 }
 
@@ -1083,8 +1133,7 @@ void lcdDrawRegularPolygon(TFT_t *dev, int32_t xc, int32_t yc, int32_t n, int32_
 	int32_t i;
 
 	rd = -angle * M_PIf / 180.0f;
-	for (i = 0; i < n; i++)
-	{
+	for (i = 0; i < n; i++)	{
 		xd = r * cosf(2 * M_PIf * i / n);
 		yd = r * sinf(2 * M_PIf * i / n);
 		x1 = (int32_t)(xd * cosf(rd) - yd * sinf(rd) + xc);
@@ -1106,10 +1155,10 @@ void lcdDrawRegularPolygon(TFT_t *dev, int32_t xc, int32_t yc, int32_t n, int32_
 // color:color
 int32_t lcdDrawChar(TFT_t *dev, int32_t x, int32_t y, char ascii, uint16_t color) {
 #if 0
-  if ((x >= dev->_width) ||                           // Clip right
-      (y >= dev->_height) ||                          // Clip bottom
-      ((x + LCD_CHAR_W * dev->_font_size - 1) < 0) || // Clip left
-      ((y + LCD_CHAR_H * dev->_font_size - 1) < 0))   // Clip top
+  if ((x >= dev->_width) ||                        // off screen right
+      (y >= dev->_height) ||                       // off screen bottom
+      ((x + LCD_CHAR_W * dev->_font_size) <= 0) || // off screen left
+      ((y + LCD_CHAR_H * dev->_font_size) <= 0))   // off screen top
     return;
 #endif
 
@@ -1229,13 +1278,22 @@ void lcdInversionOn(TFT_t *dev) {
 
 // Enable use of frame buffer
 void lcdFrameEnable(TFT_t *dev) {
-	dev->_frame_buffer = heap_caps_malloc(sizeof(uint16_t)*dev->_width*dev->_height, MALLOC_CAP_DMA);
-	if (dev->_frame_buffer == NULL) {
-		ESP_LOGE(TAG, "heap_caps_malloc fail");
-	} else {
-		ESP_LOGI(TAG, "heap_caps_malloc success");
-		dev->_use_frame_buffer = true;
-	}
+    size_t frame_buffer_size = sizeof(uint16_t) * dev->_width * dev->_height;
+    multi_heap_info_t free_heap;
+	heap_caps_get_info(&free_heap, MALLOC_CAP_DMA);
+    ESP_LOGI(TAG, "Free heap size before allocation: %d", free_heap.total_free_bytes);
+	ESP_LOGI(TAG, "Largest free block: %d", free_heap.largest_free_block);
+    ESP_LOGI(TAG, "Required frame buffer size: %d", frame_buffer_size);
+
+    dev->_frame_buffer = heap_caps_malloc(frame_buffer_size, MALLOC_CAP_DMA);
+    if (dev->_frame_buffer == NULL) {
+        ESP_LOGE(TAG, "heap_caps_malloc fail");
+    } else {
+        ESP_LOGI(TAG, "heap_caps_malloc success");
+        size_t free_heap_after = heap_caps_get_free_size(MALLOC_CAP_DMA);
+        ESP_LOGI(TAG, "Free heap size after allocation: %d", free_heap_after);
+        dev->_use_frame_buffer = true;
+    }
 }
 
 // Disable use of frame buffer
@@ -1244,6 +1302,7 @@ void lcdFrameDisable(TFT_t *dev) {
 	dev->_use_frame_buffer = false;
 }
 
+// Scroll image in frame buffer
 void lcdWrapArround(TFT_t *dev, scroll_t scroll, int32_t start, int32_t end) {
 	if (dev->_use_frame_buffer == false) return;
 
@@ -1307,15 +1366,18 @@ void lcdWriteFrame(TFT_t *dev)
 	spi_master_write_command(dev, 0x2B); // set Page(y) address
 	spi_master_write_addr(dev, dev->_offsety, dev->_offsety+dev->_height-1);
 	spi_master_write_command(dev, 0x2C); // Memory Write
+	spi_master_write_colors(dev, dev->_frame_buffer, dev->_width*dev->_height);
 
-	int32_t  size = dev->_width*dev->_height;
+#if 0
+	size_t size = dev->_width*dev->_height;
 	uint16_t *image = dev->_frame_buffer;
 	while (size > 0) {
 		// 1024 bytes per time.
-		uint16_t bs = (size > 1024) ? 1024 : size;
+		size_t bs = (size > 512) ? 512 : size;
 		spi_master_write_colors(dev, image, bs);
 		size -= bs;
 		image += bs;
 	}
+#endif
 	return;
 }

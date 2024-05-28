@@ -28,10 +28,20 @@ missile_t *plane_missile = missiles+CONFIG_MAX_ENEMY_MISSILES+
 uint64_t shots;
 uint64_t impacts;
 
+// Global variables for cursor
+int32_t cursor_x, cursor_y;
+
+// Draw the cursor on the screen
+void cursor(int32_t x, int32_t y, uint16_t color) {
+	int32_t s2 = CONFIG_CURSOR_SIZE >> 1; // size div 2
+	lcdDrawHLine(&dev, x-s2, y,    CONFIG_CURSOR_SIZE, color);
+	lcdDrawVLine(&dev, x,    y-s2, CONFIG_CURSOR_SIZE, color);
+}
+
 // Initialize the game control logic.
 // This function initializes all missiles, planes, stats, etc.
-void gameControl_init(void)
-{
+void gameControl_init(void) {
+	cursor_init(CONFIG_PER_MS);
 	// Initialize missiles
 	for (uint32_t i = 0; i < CONFIG_MAX_ENEMY_MISSILES; i++)
 		missile_init_enemy(enemy_missiles+i);
@@ -50,8 +60,8 @@ void gameControl_init(void)
 // This function calls the missile & plane tick functions, reinitializes
 // idle enemy missiles, handles button presses, fires player missiles,
 // detects collisions, and updates statistics.
-void gameControl_tick(void)
-{
+void gameControl_tick(void) {
+	if (!globals_get_in_game()) return;
 	// Tick missiles in one batch
 	for (uint32_t i = 0; i < CONFIG_MAX_TOTAL_MISSILES; i++)
 		missile_tick(missiles+i);
@@ -65,7 +75,7 @@ void gameControl_tick(void)
 	static bool pressed = false;
 	coord_t x, y;
 	uint64_t btns;
-	btns = ~pin_get_in_reg() & BTN_MASK;
+	btns = ~pin_get_in_reg() & BTN_MISSILE_FIRE_MASK;
 	// Checks to see if any buttons are pressed
 	if (!pressed && btns) {
 		pressed = true;
@@ -127,4 +137,8 @@ void gameControl_tick(void)
 			plane_explode();
 		}
 	}
+
+	cursor_tick();
+	cursor_get_pos(&cursor_x, &cursor_y);
+	cursor(cursor_x, cursor_y, CONFIG_COLOR_CURSOR);
 }

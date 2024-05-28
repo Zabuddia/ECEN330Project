@@ -16,5 +16,9 @@
 	1LLU << BTN_SELECT | \
 	1LLU << BTN_START \
 	)
+#define BTN_MISSILE_FIRE_MASK ( \
+	1LLU << BTN_A | \
+	1LLU << BTN_B \
+	)
 
 #endif // BTN_H_

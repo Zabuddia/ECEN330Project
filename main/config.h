@@ -54,6 +54,14 @@
 
 #define CONFIG_COLOR_PLANE WHITE
 
+#define CONFIG_COLOR_SELECT_TEXT BLACK
+#define CONFIG_COLOR_SELECT_TEXT_BACKGROUND WHITE
+#define CONFIG_COLOR_TOP_LEFT_TEXT WHITE
+
+#define CONFIG_CURSOR_SIZE 7
+
+#define CONFIG_PER_MS ((uint32_t)(CONFIG_GAME_TIMER_PERIOD*1000))
+
 #include "lcd.h"
 // Defined in main.c. Declared here so all modules can see it.
 extern TFT_t dev; // Declare device handle for the display
