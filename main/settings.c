@@ -13,7 +13,7 @@ enum settings_states {
 
 static void draw_settings() {
     lcdDrawString(&dev, 0, 0, "Settings", CONFIG_COLOR_TOP_LEFT_TEXT);
-    lcdDrawString(&dev, 80, 50, "SELECT, START, A, and B change colors", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, 50, 50, "SELECT, START, A, and B change colors", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, 100, 80, "Enemy color", globals_get_enemy_color());
     lcdDrawString(&dev, 100, 100, "Player color", globals_get_player_color());
     lcdDrawString(&dev, 100, 120, "Plane color", globals_get_plane_color());
@@ -21,7 +21,7 @@ static void draw_settings() {
 }
 
 void settings_init() {
-    settings_state = STATE_INIT;
+    settings_state = STATE_WAITING;
 }
 
 void settings_tick() {

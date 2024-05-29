@@ -24,8 +24,8 @@ void missile_init_helper(missile_t *missile) {
     missile->explode_me = false;
     int32_t temp_y = missile->y_dest - missile->y_origin;
     int32_t temp_x = missile->x_dest - missile->x_origin;
-    temp_y = pow(temp_y, 2);
-    temp_x = pow(temp_x, 2);
+    temp_y *= temp_y;
+    temp_x *= temp_x;
     missile->total_length = sqrtf(temp_y + temp_x);
     missile->x_current = missile->x_origin;
     missile->y_current = missile->y_origin;
@@ -265,9 +265,9 @@ bool missile_is_colliding(missile_t *missile, coord_t x, coord_t y) {
     } else {
         int32_t delta_y = abs(missile->y_current - y);
         int32_t delta_x = abs(missile->x_current - x);
-        int32_t radius_squared = pow(CONFIG_EXPLOSION_MAX_RADIUS, 2);
-        delta_y = pow(delta_y, 2);
-        delta_x = pow(delta_x, 2);
+        int32_t radius_squared = missile->radius * missile->radius;
+        delta_y *= delta_y;
+        delta_x *= delta_x;
         // Checks if the object is in the missile's radius
         if ((delta_y + delta_x) <= radius_squared) {
             return true;

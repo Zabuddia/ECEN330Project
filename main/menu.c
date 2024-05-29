@@ -4,13 +4,13 @@
 #define DCY_UPPER_THRESHOLD 200
 #define NUM_TICKS 5
 
-#define GAME_X 150
+#define GAME_X 100
 #define GAME_Y 50
-#define SETTINGS_X 150
+#define SETTINGS_X 100
 #define SETTINGS_Y 100
-#define CONTROLLER_X 150
+#define CONTROLLER_X 100
 #define CONTROLLER_Y 150
-#define TIMER_X 150
+#define TIMER_X 100
 #define TIMER_Y 200
 
 // #define GAME_RECTANGLE_LOWER_X (GAME_X - 10)
@@ -51,39 +51,43 @@ static const char *TAG = "menu";
 
 static void draw_menu_game() {
     lcdDrawString(&dev, 0, 0, "Main Menu", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, 150, 0, "Press SELECT to choose", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_SELECT_TEXT_BACKGROUND);
     lcdDrawString(&dev, GAME_X, GAME_Y, "Game", CONFIG_COLOR_SELECT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);
     lcdDrawString(&dev, SETTINGS_X, SETTINGS_Y, "Settings", CONFIG_COLOR_TOP_LEFT_TEXT);
-    lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Controller", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Cube", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_TOP_LEFT_TEXT);
 }
 
 static void draw_menu_settings() {
     lcdDrawString(&dev, 0, 0, "Main Menu", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, 150, 0, "Press SELECT to choose", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, GAME_X, GAME_Y, "Game", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_SELECT_TEXT_BACKGROUND);
     lcdDrawString(&dev, SETTINGS_X, SETTINGS_Y, "Settings", CONFIG_COLOR_SELECT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);
-    lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Controller", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Cube", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_TOP_LEFT_TEXT);
 }
 
 static void draw_menu_controller() {
     lcdDrawString(&dev, 0, 0, "Main Menu", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, 150, 0, "Press SELECT to choose", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, GAME_X, GAME_Y, "Game", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, SETTINGS_X, SETTINGS_Y, "Settings", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_SELECT_TEXT_BACKGROUND);
-    lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Controller", CONFIG_COLOR_SELECT_TEXT);
+    lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Cube", CONFIG_COLOR_SELECT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);
     lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_TOP_LEFT_TEXT);
 }
 
 static void draw_menu_timer() {
     lcdDrawString(&dev, 0, 0, "Main Menu", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, 150, 0, "Press SELECT to choose", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, GAME_X, GAME_Y, "Game", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, SETTINGS_X, SETTINGS_Y, "Settings", CONFIG_COLOR_TOP_LEFT_TEXT);
-    lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Controller", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Cube", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_SELECT_TEXT_BACKGROUND);
     lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_SELECT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);

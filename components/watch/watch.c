@@ -35,6 +35,7 @@
 
 // Initialize the watch face. The device dev must be valid.
 void watch_init(TFT_t *dev) {
+	lcdDrawString(dev, 0, 0, "Timer", WHITE);
 	// Watch face
 	lcdDrawRoundRect(dev, FACE_X1, FACE_Y1, FACE_X2, FACE_Y2, FACE_R, FACE_C);
 

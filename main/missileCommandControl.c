@@ -107,6 +107,19 @@ void gameControl_tick(void) {
 				missile_explode(player_missiles+i);
 				missile_explode(enemy_missiles+j);
 			}
+			// Checks if the plane missile is colliding with the enemy missile
+			if (missile_is_colliding(enemy_missiles+j, plane_missile->x_current, plane_missile->y_current)) {
+				missile_explode(plane_missile);
+				missile_explode(enemy_missiles+j);
+			}
+			// Cycles through the enemy missiles
+			for (uint32_t k = 0; k < CONFIG_MAX_ENEMY_MISSILES; k++) {
+				// Checks to see if any enemy missiles are colliding
+				if (missile_is_colliding(enemy_missiles+j, (enemy_missiles+k)->x_current, (enemy_missiles+k)->y_current)) {
+					missile_explode(enemy_missiles+j);
+					missile_explode(enemy_missiles+k);
+				}
+			}
 		}
 	}
 
