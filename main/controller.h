@@ -9,7 +9,7 @@
 #include "lcd.h"
 #include "pin.h"
 #include "globals.h"
-#include "bluetooth.h"
+//#include "bluetooth.h"
 
 void controller_init();
 void controller_tick();

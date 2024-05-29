@@ -68,7 +68,7 @@ void app_main() {
     interrupt_flag = false;
 
     lcdInit(&dev);
-    //lcdFrameEnable(&dev);
+    lcdFrameEnable(&dev);
     lcdFillScreen(&dev, CONFIG_COLOR_BACKGROUND);
     lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);
 
@@ -106,6 +106,6 @@ void app_main() {
         gameControl_tick();
         timer_tick();
         controller_tick();
-        //lcdWriteFrame(&dev);
+        lcdWriteFrame(&dev);
     }
 }

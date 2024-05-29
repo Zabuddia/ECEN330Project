@@ -84,31 +84,31 @@ void controller_tick() {
             dcx = 0;
             dcy = 0;
             joy_init();
-            bluetooth_init();
+            //bluetooth_init();
             joy_get_displacement(&dcx, &dcy);
             break;
         case CONTROLLER_STATE_NONE:
-            send_bluetooth_message((uint8_t *) "0", 1);
+            //send_bluetooth_message((uint8_t *) "0", 1);
             joy_get_displacement(&dcx, &dcy);
             break;
         case CONTROLLER_STATE_LEFT:
-            send_bluetooth_message((uint8_t *) "4", 1);
+            //send_bluetooth_message((uint8_t *) "4", 1);
             joy_get_displacement(&dcx, &dcy);
             break;
         case CONTROLLER_STATE_RIGHT:
-            send_bluetooth_message((uint8_t *) "2", 1);
+            //send_bluetooth_message((uint8_t *) "2", 1);
             joy_get_displacement(&dcx, &dcy);
             break;
         case CONTROLLER_STATE_UP:
-            send_bluetooth_message((uint8_t *) "1", 1);
+            //send_bluetooth_message((uint8_t *) "1", 1);
             joy_get_displacement(&dcx, &dcy);
             break;
         case CONTROLLER_STATE_DOWN:
-            send_bluetooth_message((uint8_t *) "3", 1);
+            //send_bluetooth_message((uint8_t *) "3", 1);
             joy_get_displacement(&dcx, &dcy);
             break;
         case CONTROLLER_STATE_CHANGE_SPEED:
-            send_bluetooth_message((uint8_t *) "5", 1);
+            //send_bluetooth_message((uint8_t *) "5", 1);
             joy_get_displacement(&dcx, &dcy);
             break;
     }
