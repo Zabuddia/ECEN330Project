@@ -20,7 +20,7 @@
 #include "menu.h"
 #include "settings.h"
 #include "timer.h"
-#include "controller.h"
+#include "cubesm.h"
 
 #define RESOLUTION  1000000
 #define ALARM_COUNT (RESOLUTION/20)
@@ -93,8 +93,7 @@ void app_main() {
     settings_init();
     gameControl_init();
     timer_init();
-    controller_init();
-
+    cube_init();
 
     while (1) {
         while (!interrupt_flag) ;
@@ -105,7 +104,7 @@ void app_main() {
         settings_tick();
         gameControl_tick();
         timer_tick();
-        controller_tick();
+        cube_tick();
         lcdWriteFrame(&dev);
     }
 }

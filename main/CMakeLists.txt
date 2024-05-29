@@ -1,1 +1,1 @@
-idf_component_register(SRCS "main.c" "missileCommandControl.c" "plane.c" "missile.c" "interface.c" "menu.c" "settings.c" "timer.c" "controller.c" "globals.c" INCLUDE_DIRS ".")
+idf_component_register(SRCS "main.c" "missileCommandControl.c" "plane.c" "missile.c" "interface.c" "menu.c" "settings.c" "timer.c" "cubesm.c" "globals.c" INCLUDE_DIRS ".")

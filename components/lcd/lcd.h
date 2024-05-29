@@ -18,6 +18,7 @@
 #define YELLOW rgb565(255, 255,   0) // 0xFFE0
 #define CYAN   rgb565(  0, 156, 209) // 0x04FA
 #define PURPLE rgb565(128,   0, 128) // 0x8010
+#define ORANGE rgb565(255, 165,   0) // 0xFA00
 
 #define LCD_CHAR_W 6
 #define LCD_CHAR_H 8
