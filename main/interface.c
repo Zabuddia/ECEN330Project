@@ -6,7 +6,8 @@ enum interface_states {
     STATE_SETTINGS,
     STATE_GAME,
     STATE_CONTROLLER,
-    STATE_TIMER
+    STATE_TIMER,
+    STATE_JOYSTICK
 } interface_state;
 
 static void menu_transition() {
@@ -35,6 +36,10 @@ static void menu_transition() {
                 interface_state = STATE_TIMER;
             }
             break;
+        case MENU_STATE_JOYSTICK_SELECTED:
+            if (!pin_get_level(BTN_SELECT)) {
+                interface_state = STATE_JOYSTICK;
+            }
     }
 }
 
@@ -70,6 +75,11 @@ void interface_tick() {
                 interface_state = STATE_MAIN_MENU;
             }
             break;
+        case STATE_JOYSTICK:
+            if (!pin_get_level(BTN_MENU)) {
+                interface_state = STATE_MAIN_MENU;
+            }
+            break;
     }
 
     // Actions
@@ -80,6 +90,7 @@ void interface_tick() {
             globals_set_in_game(false);
             globals_set_in_controller(false);
             globals_set_in_timer(false);
+            globals_set_in_joystick(false);
             break;
         case STATE_RESET:
             break;
@@ -89,6 +100,7 @@ void interface_tick() {
             globals_set_in_game(false);
             globals_set_in_controller(false);
             globals_set_in_timer(false);
+            globals_set_in_joystick(false);
             break;
         case STATE_GAME:
             globals_set_in_game(true);
@@ -96,6 +108,7 @@ void interface_tick() {
             globals_set_in_settings(false);
             globals_set_in_controller(false);
             globals_set_in_timer(false);
+            globals_set_in_joystick(false);
             break;
         case STATE_CONTROLLER:
             globals_set_in_controller(true);
@@ -103,6 +116,7 @@ void interface_tick() {
             globals_set_in_settings(false);
             globals_set_in_game(false);
             globals_set_in_timer(false);
+            globals_set_in_joystick(false);
             break;
         case STATE_TIMER:
             globals_set_in_timer(true);
@@ -110,6 +124,15 @@ void interface_tick() {
             globals_set_in_settings(false);
             globals_set_in_game(false);
             globals_set_in_controller(false);
+            globals_set_in_joystick(false);
+            break;
+        case STATE_JOYSTICK:
+            globals_set_in_joystick(true);
+            globals_set_in_menu(false);
+            globals_set_in_settings(false);
+            globals_set_in_game(false);
+            globals_set_in_controller(false);
+            globals_set_in_timer(false);
             break;
     }
 }

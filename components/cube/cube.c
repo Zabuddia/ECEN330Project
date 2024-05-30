@@ -104,31 +104,34 @@ void showcube(RubiksCube rubiks_cube) {
 
 void display_draw_rubiks_cube(RubiksCube rubiks_cube) {
     lcdFillScreen(&dev, GRAY);
-    lcdFillRect(&dev, 5, 5, 228, 228, BLACK);
+    lcdSetFontBackground(&dev, GRAY);
+    lcdDrawString(&dev, 0, 0, "Cube", WHITE);
+    lcdSetFontBackground(&dev, BLACK);
+        lcdFillRect(&dev, 85, 5, 308, 228, BLACK);
     for (uint8_t j = 0; j < 3; ++j) {
         for (uint8_t i = 0; i < 3; ++i) {
             if (rubiks_cube.cube[2][j][i] == 'w') {
-                lcdFillRect(&dev, (i * 74) + 8, (j * 74) + 8, (i * 74) + 77, (j * 74) + 77,
+                lcdFillRect(&dev, (i * 74) + 88, (j * 74) + 8, (i * 74) + 157, (j * 74) + 77,
                                        WHITE);
             }
             if (rubiks_cube.cube[2][j][i] == 'o') {
-                lcdFillRect(&dev, (i * 74) + 8, (j * 74) + 8, (i * 74) + 77, (j * 74) + 77,
+                lcdFillRect(&dev, (i * 74) + 88, (j * 74) + 8, (i * 74) + 157, (j * 74) + 77,
                                        ORANGE);
             }
             if (rubiks_cube.cube[2][j][i] == 'g') {
-                lcdFillRect(&dev, (i * 74) + 8, (j * 74) + 8, (i * 74) + 77, (j * 74) + 77,
+                lcdFillRect(&dev, (i * 74) + 88, (j * 74) + 8, (i * 74) + 157, (j * 74) + 77,
                                        GREEN);
             }
             if (rubiks_cube.cube[2][j][i] == 'r') {
-                lcdFillRect(&dev, (i * 74) + 8, (j * 74) + 8, (i * 74) + 77, (j * 74) + 77,
+                lcdFillRect(&dev, (i * 74) + 88, (j * 74) + 8, (i * 74) + 157, (j * 74) + 77,
                                        RED);
             }
             if (rubiks_cube.cube[2][j][i] == 'b') {
-                lcdFillRect(&dev, (i * 74) + 8, (j * 74) + 8, (i * 74) + 77, (j * 74) + 77,
+                lcdFillRect(&dev, (i * 74) + 88, (j * 74) + 8, (i * 74) + 157, (j * 74) + 77,
                                        BLUE);
             }
             if (rubiks_cube.cube[2][j][i] == 'y') {
-                lcdFillRect(&dev, (i * 74) + 8, (j * 74) + 8, (i * 74) + 77, (j * 74) + 77,
+                lcdFillRect(&dev, (i * 74) + 88, (j * 74) + 8, (i * 74) + 157, (j * 74) + 77,
                                        YELLOW);
             }
         }

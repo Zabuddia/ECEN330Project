@@ -15,12 +15,14 @@
 #include "cursor.h"
 #include "joy.h"
 #include "pin.h"
+#include "tone.h"
 #include "missileCommandControl.h"
 #include "interface.h"
 #include "menu.h"
 #include "settings.h"
 #include "timer.h"
 #include "cubesm.h"
+#include "joystick.h"
 
 #define RESOLUTION  1000000
 #define ALARM_COUNT (RESOLUTION/20)
@@ -94,6 +96,7 @@ void app_main() {
     gameControl_init();
     timer_init();
     cube_init();
+    joystick_init();
 
     while (1) {
         while (!interrupt_flag) ;
@@ -105,6 +108,7 @@ void app_main() {
         gameControl_tick();
         timer_tick();
         cube_tick();
+        joystick_tick();
         lcdWriteFrame(&dev);
     }
 }

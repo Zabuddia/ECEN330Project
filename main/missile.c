@@ -9,14 +9,14 @@
 #define LAUNCH_SITE_3 240
 
 // All of the states for the missile state machine
-static enum missile_SM_states {
+typedef enum missile_SM_states {
     INITIALIZING,
     MOVING,
     EXPLODING_GROWING,
     EXPLODING_SHRINKING,
     IMPACTED,
     IDLE
-};
+} missile_SM_state;
 
 // Helper function for initializing the missiles
 void missile_init_helper(missile_t *missile) {
@@ -113,10 +113,22 @@ void state_moving(missile_t *missile) {
     // Determines how far the missile moves based on the type of missile
     switch (missile->type) {
         case MISSILE_TYPE_ENEMY:
-            missile->length += CONFIG_ENEMY_MISSILE_DISTANCE_PER_TICK;
+            if (globals_get_difficulty() == DIFFICULTY_EASY) {
+                missile->length += CONFIG_ENEMY_MISSILE_DISTANCE_PER_TICK;
+            } else if (globals_get_difficulty() == DIFFICULTY_MEDIUM) {
+                missile->length += CONFIG_ENEMY_MISSILE_DISTANCE_PER_TICK * 2;
+            } else {
+                missile->length += CONFIG_ENEMY_MISSILE_DISTANCE_PER_TICK * 3;
+            }
             break;
         case MISSILE_TYPE_PLANE:
-            missile->length += CONFIG_ENEMY_MISSILE_DISTANCE_PER_TICK;
+            if (globals_get_difficulty() == DIFFICULTY_EASY) {
+                missile->length += CONFIG_ENEMY_MISSILE_DISTANCE_PER_TICK;
+            } else if (globals_get_difficulty() == DIFFICULTY_MEDIUM) {
+                missile->length += CONFIG_ENEMY_MISSILE_DISTANCE_PER_TICK * 2;
+            } else {
+                missile->length += CONFIG_ENEMY_MISSILE_DISTANCE_PER_TICK * 3;
+            }
             break;
         case MISSILE_TYPE_PLAYER:
             missile->length += CONFIG_PLAYER_MISSILE_DISTANCE_PER_TICK;

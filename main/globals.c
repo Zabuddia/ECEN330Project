@@ -1,16 +1,11 @@
 #include "globals.h"
 
-bool go_to_menu = false;
-bool go_to_settings = false;
-bool go_to_game = false;
-bool go_to_controller = false;
-bool go_to_timer = false;
-
 bool in_menu = false;
 bool in_game = false;
 bool in_settings = false;
 bool in_controller = false;
 bool in_timer = false;
+bool in_joystick = false;
 
 enum GAME_COLORS_PLAYER player_color = PLAYER_COLOR_GREEN;
 enum GAME_COLORS_ENEMY enemy_color = ENEMY_COLOR_RED;
@@ -140,46 +135,6 @@ void globals_increment_difficulty() {
     difficulty = (difficulty + 1) % 3;
 }
 
-bool globals_get_go_to_menu() {
-    return go_to_menu;
-}
-
-bool globals_get_go_to_settings() {
-    return go_to_settings;
-}
-
-bool globals_get_go_to_game() {
-    return go_to_game;
-}
-
-bool globals_get_go_to_controller() {
-    return go_to_controller;
-}
-
-bool globals_get_go_to_timer() {
-    return go_to_timer;
-}
-
-void globals_set_go_to_menu(bool value) {
-    go_to_menu = value;
-}
-
-void globals_set_go_to_settings(bool value) {
-    go_to_settings = value;
-}
-
-void globals_set_go_to_game(bool value) {
-    go_to_game = value;
-}
-
-void globals_set_go_to_controller(bool value) {
-    go_to_controller = value;
-}
-
-void globals_set_go_to_timer(bool value) {
-    go_to_timer = value;
-}
-
 bool globals_get_in_menu() {
     return in_menu;
 }
@@ -200,6 +155,10 @@ bool globals_get_in_timer() {
     return in_timer;
 }
 
+bool globals_get_in_joystick() {
+    return in_joystick;
+}
+
 void globals_set_in_menu(bool value) {
     in_menu = value;
 }
@@ -218,4 +177,8 @@ void globals_set_in_controller(bool value) {
 
 void globals_set_in_timer(bool value) {
     in_timer = value;
+}
+
+void globals_set_in_joystick(bool value) {
+    in_joystick = value;
 }

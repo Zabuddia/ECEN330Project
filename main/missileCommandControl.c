@@ -63,7 +63,8 @@ void gameControl_init(void) {
 void gameControl_tick(void) {
 	if (!globals_get_in_game()) return;
 	// Tick missiles in one batch
-	for (uint32_t i = 0; i < CONFIG_MAX_TOTAL_MISSILES; i++)
+	missile_tick(plane_missile);
+	for (uint32_t i = 0; i < CONFIG_MAX_TOTAL_MISSILES - 1; i++)
 		missile_tick(missiles+i);
 
 	// Reinitialize idle enemy missiles
@@ -107,8 +108,13 @@ void gameControl_tick(void) {
 				missile_explode(player_missiles+i);
 				missile_explode(enemy_missiles+j);
 			}
-			// Checks if the plane missile is colliding with the enemy missile
+			// Checks if the enemy missile is colliding with the plane missile
 			if (missile_is_colliding(enemy_missiles+j, plane_missile->x_current, plane_missile->y_current)) {
+				missile_explode(plane_missile);
+				missile_explode(enemy_missiles+j);
+			}
+			// Checks if the plane missile is colliding with the enemy missile
+			if (missile_is_colliding(plane_missile, (enemy_missiles+j)->x_current, (enemy_missiles+j)->y_current)) {
 				missile_explode(plane_missile);
 				missile_explode(enemy_missiles+j);
 			}
