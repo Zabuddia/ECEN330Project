@@ -107,7 +107,7 @@ void display_draw_rubiks_cube(RubiksCube rubiks_cube) {
     lcdSetFontBackground(&dev, GRAY);
     lcdDrawString(&dev, 0, 0, "Cube", WHITE);
     lcdSetFontBackground(&dev, BLACK);
-        lcdFillRect(&dev, 85, 5, 308, 228, BLACK);
+    lcdFillRect(&dev, 85, 5, 308, 228, BLACK);
     for (uint8_t j = 0; j < 3; ++j) {
         for (uint8_t i = 0; i < 3; ++i) {
             if (rubiks_cube.cube[2][j][i] == 'w') {
