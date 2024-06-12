@@ -23,6 +23,8 @@
 #include "timer.h"
 #include "cubesm.h"
 #include "joystick.h"
+#include "uart.h"
+#include "controller.h"
 
 #define RESOLUTION  1000000
 #define ALARM_COUNT (RESOLUTION/20)
@@ -97,6 +99,7 @@ void app_main() {
     timer_init();
     cube_init();
     joystick_init();
+    uart_init();
 
     while (1) {
         while (!interrupt_flag) ;
@@ -107,8 +110,10 @@ void app_main() {
         settings_tick();
         gameControl_tick();
         timer_tick();
-        cube_tick();
+        //cube_tick();
         joystick_tick();
+        controller_tick_1();
+        controller_tick_2();
         lcdWriteFrame(&dev);
     }
 }
