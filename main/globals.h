@@ -11,6 +11,7 @@ extern bool in_settings;
 extern bool in_controller;
 extern bool in_timer;
 extern bool in_joystick;
+extern bool in_cube;
 
 enum GAME_COLORS_PLAYER {
     PLAYER_COLOR_RED,
@@ -74,7 +75,8 @@ enum MENU_STATES {
     MENU_STATE_SETTINGS_SELECTED,
     MENU_STATE_CONTROLLER_SELECTED,
     MENU_STATE_TIMER_SELECTED,
-    MENU_STATE_JOYSTICK_SELECTED
+    MENU_STATE_JOYSTICK_SELECTED,
+    MENU_STATE_CUBE_SELECTED
 };
 extern enum MENU_STATES global_menu_state;
 
@@ -98,11 +100,13 @@ bool globals_get_in_settings();
 bool globals_get_in_controller();
 bool globals_get_in_timer();
 bool globals_get_in_joystick();
+bool globals_get_in_cube();
 void globals_set_in_menu(bool value);
 void globals_set_in_game(bool value);
 void globals_set_in_settings(bool value);
 void globals_set_in_controller(bool value);
 void globals_set_in_timer(bool value);
 void globals_set_in_joystick(bool value);
+void globals_set_in_cube(bool value);
 
 #endif // GLOBALS_H

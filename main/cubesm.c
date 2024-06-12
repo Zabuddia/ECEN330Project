@@ -28,7 +28,7 @@ void cube_tick() {
     // Transitions
     switch (cubesm_state) {
         case CUBE_WAIT:
-            if (globals_get_in_controller()) {
+            if (globals_get_in_cube()) {
                 cubesm_state = CUBE_WAITING;
             }
             break;
@@ -51,7 +51,7 @@ void cube_tick() {
                 cubesm_state = CUBE_LEFT;
             } else if (!pin_get_level(BTN_OPTION)) {
                 cubesm_state = CUBE_FRONT;
-            } else if (!globals_get_in_controller()) {
+            } else if (!globals_get_in_cube()) {
                 cubesm_state = CUBE_WAIT;
             }
             break;

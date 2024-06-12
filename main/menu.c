@@ -7,13 +7,15 @@
 #define GAME_X 100
 #define GAME_Y 50
 #define SETTINGS_X 100
-#define SETTINGS_Y 90
+#define SETTINGS_Y 80
 #define CONTROLLER_X 100
-#define CONTROLLER_Y 130
+#define CONTROLLER_Y 110
 #define TIMER_X 100
-#define TIMER_Y 170
+#define TIMER_Y 140
 #define JOYSTICK_X 100
-#define JOYSTICK_Y 210
+#define JOYSTICK_Y 170
+#define CUBE_X 100
+#define CUBE_Y 200
 
 // #define GAME_RECTANGLE_LOWER_X (GAME_X - 10)
 // #define GAME_RECTANGLE_LOWER_Y (GAME_Y - 5)
@@ -42,7 +44,8 @@ enum menu_states {
     STATE_SETTINGS_SELECTED,
     STATE_CONTROLLER_SELECTED,
     STATE_TIMER_SELECTED,
-    STATE_JOYSTICK_SELECTED
+    STATE_JOYSTICK_SELECTED,
+    STATE_CUBE_SELECTED
 } menu_state;
 
 static int32_t dcx, dcy;
@@ -62,6 +65,7 @@ static void draw_menu_game() {
     lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Controller", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, JOYSTICK_X, JOYSTICK_Y, "Joystick", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, CUBE_X, CUBE_Y, "Cube", CONFIG_COLOR_TOP_LEFT_TEXT);
 }
 
 static void draw_menu_settings() {
@@ -74,6 +78,7 @@ static void draw_menu_settings() {
     lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Controller", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, JOYSTICK_X, JOYSTICK_Y, "Joystick", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, CUBE_X, CUBE_Y, "Cube", CONFIG_COLOR_TOP_LEFT_TEXT);
 }
 
 static void draw_menu_controller() {
@@ -86,6 +91,7 @@ static void draw_menu_controller() {
     lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);
     lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdDrawString(&dev, JOYSTICK_X, JOYSTICK_Y, "Joystick", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, CUBE_X, CUBE_Y, "Cube", CONFIG_COLOR_TOP_LEFT_TEXT);
 }
 
 static void draw_menu_timer() {
@@ -98,6 +104,7 @@ static void draw_menu_timer() {
     lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_SELECT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);
     lcdDrawString(&dev, JOYSTICK_X, JOYSTICK_Y, "Joystick", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, CUBE_X, CUBE_Y, "Cube", CONFIG_COLOR_TOP_LEFT_TEXT);
 }
 
 static void draw_menu_joystick() {
@@ -109,6 +116,20 @@ static void draw_menu_joystick() {
     lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_TOP_LEFT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_SELECT_TEXT_BACKGROUND);
     lcdDrawString(&dev, JOYSTICK_X, JOYSTICK_Y, "Joystick", CONFIG_COLOR_SELECT_TEXT);
+    lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);
+    lcdDrawString(&dev, CUBE_X, CUBE_Y, "Cube", CONFIG_COLOR_TOP_LEFT_TEXT);
+}
+
+static void draw_menu_cube() {
+    lcdDrawString(&dev, 0, 0, "Main Menu", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, 150, 0, "Press SELECT to choose", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, GAME_X, GAME_Y, "Game", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, SETTINGS_X, SETTINGS_Y, "Settings", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, CONTROLLER_X, CONTROLLER_Y, "Controller", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, TIMER_X, TIMER_Y, "Timer", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdDrawString(&dev, JOYSTICK_X, JOYSTICK_Y, "Joystick", CONFIG_COLOR_TOP_LEFT_TEXT);
+    lcdSetFontBackground(&dev, CONFIG_COLOR_SELECT_TEXT_BACKGROUND);
+    lcdDrawString(&dev, CUBE_X, CUBE_Y, "Cube", CONFIG_COLOR_SELECT_TEXT);
     lcdSetFontBackground(&dev, CONFIG_COLOR_TEXT_BACKGROUND);
 }
 
@@ -188,6 +209,19 @@ void menu_tick() {
                 if (dcy < DCY_LOWER_THRESHOLD) {
                     menu_state = STATE_TIMER_SELECTED;
                 } else if (dcy > DCY_UPPER_THRESHOLD) {
+                    menu_state = STATE_CUBE_SELECTED;
+                }
+                tick_counter = 0;
+            }
+            if (!globals_get_in_menu()) {
+                menu_state = STATE_WAITING;
+            }
+            break;
+        case STATE_CUBE_SELECTED:
+            if (hold && tick_counter > NUM_TICKS) {
+                if (dcy < DCY_LOWER_THRESHOLD) {
+                    menu_state = STATE_JOYSTICK_SELECTED;
+                } else if (dcy > DCY_UPPER_THRESHOLD) {
                     menu_state = STATE_GAME_SELECTED;
                 }
                 tick_counter = 0;
@@ -241,6 +275,12 @@ void menu_tick() {
         case STATE_JOYSTICK_SELECTED:
             globals_set_menu_state(MENU_STATE_JOYSTICK_SELECTED);
             draw_menu_joystick();
+            joy_get_displacement(&dcx, &dcy);
+            tick_counter++;
+            break;
+        case STATE_CUBE_SELECTED:
+            globals_set_menu_state(MENU_STATE_CUBE_SELECTED);
+            draw_menu_cube();
             joy_get_displacement(&dcx, &dcy);
             tick_counter++;
             break;

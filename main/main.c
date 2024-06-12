@@ -110,7 +110,7 @@ void app_main() {
         settings_tick();
         gameControl_tick();
         timer_tick();
-        //cube_tick();
+        cube_tick();
         joystick_tick();
         controller_tick_1();
         controller_tick_2();

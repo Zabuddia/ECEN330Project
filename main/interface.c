@@ -7,7 +7,8 @@ enum interface_states {
     STATE_GAME,
     STATE_CONTROLLER,
     STATE_TIMER,
-    STATE_JOYSTICK
+    STATE_JOYSTICK,
+    STATE_CUBE
 } interface_state;
 
 static void menu_transition() {
@@ -40,6 +41,12 @@ static void menu_transition() {
             if (!pin_get_level(BTN_SELECT)) {
                 interface_state = STATE_JOYSTICK;
             }
+            break;
+        case MENU_STATE_CUBE_SELECTED:
+            if (!pin_get_level(BTN_SELECT)) {
+                interface_state = STATE_CUBE;
+            }
+            break;
     }
 }
 
@@ -80,6 +87,11 @@ void interface_tick() {
                 interface_state = STATE_MAIN_MENU;
             }
             break;
+        case STATE_CUBE:
+            if (!pin_get_level(BTN_MENU)) {
+                interface_state = STATE_MAIN_MENU;
+            }
+            break;
     }
 
     // Actions
@@ -91,6 +103,7 @@ void interface_tick() {
             globals_set_in_controller(false);
             globals_set_in_timer(false);
             globals_set_in_joystick(false);
+            globals_set_in_cube(false);
             break;
         case STATE_RESET:
             break;
@@ -101,6 +114,7 @@ void interface_tick() {
             globals_set_in_controller(false);
             globals_set_in_timer(false);
             globals_set_in_joystick(false);
+            globals_set_in_cube(false);
             break;
         case STATE_GAME:
             globals_set_in_game(true);
@@ -109,6 +123,7 @@ void interface_tick() {
             globals_set_in_controller(false);
             globals_set_in_timer(false);
             globals_set_in_joystick(false);
+            globals_set_in_cube(false);
             break;
         case STATE_CONTROLLER:
             globals_set_in_controller(true);
@@ -117,6 +132,7 @@ void interface_tick() {
             globals_set_in_game(false);
             globals_set_in_timer(false);
             globals_set_in_joystick(false);
+            globals_set_in_cube(false);
             break;
         case STATE_TIMER:
             globals_set_in_timer(true);
@@ -125,6 +141,7 @@ void interface_tick() {
             globals_set_in_game(false);
             globals_set_in_controller(false);
             globals_set_in_joystick(false);
+            globals_set_in_cube(false);
             break;
         case STATE_JOYSTICK:
             globals_set_in_joystick(true);
@@ -133,6 +150,16 @@ void interface_tick() {
             globals_set_in_game(false);
             globals_set_in_controller(false);
             globals_set_in_timer(false);
+            globals_set_in_cube(false);
+            break;
+        case STATE_CUBE:
+            globals_set_in_cube(true);
+            globals_set_in_menu(false);
+            globals_set_in_settings(false);
+            globals_set_in_game(false);
+            globals_set_in_controller(false);
+            globals_set_in_timer(false);
+            globals_set_in_joystick(false);
             break;
     }
 }

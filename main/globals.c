@@ -6,6 +6,7 @@ bool in_settings = false;
 bool in_controller = false;
 bool in_timer = false;
 bool in_joystick = false;
+bool in_cube = false;
 
 enum GAME_COLORS_PLAYER player_color = PLAYER_COLOR_GREEN;
 enum GAME_COLORS_ENEMY enemy_color = ENEMY_COLOR_RED;
@@ -159,6 +160,10 @@ bool globals_get_in_joystick() {
     return in_joystick;
 }
 
+bool globals_get_in_cube() {
+    return in_cube;
+}
+
 void globals_set_in_menu(bool value) {
     in_menu = value;
 }
@@ -181,4 +186,8 @@ void globals_set_in_timer(bool value) {
 
 void globals_set_in_joystick(bool value) {
     in_joystick = value;
+}
+
+void globals_set_in_cube(bool value) {
+    in_cube = value;
 }
