@@ -10,7 +10,7 @@
 
 static char uart_buffer[BUF_SIZE];
 static int uart_buffer_index = 0;
-int counter = 0;
+int counter = -1;
 
 static const char *TAG = "UART";
 

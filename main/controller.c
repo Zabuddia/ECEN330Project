@@ -128,7 +128,7 @@ void controller_tick_1() {
 void controller_tick_2() {
     static int total_data = 0;
     if (globals_get_in_controller() == false) {
-        counter = 0;
+        counter = -1;
         total_data = 0;
         return;
     }
@@ -137,6 +137,11 @@ void controller_tick_2() {
     char data[128];
     uart_read_data(data, 128);
     total_data += atoi(data);
+    if (counter == -1) {
+        lcdFillScreen(&dev, CONFIG_COLOR_BACKGROUND);
+        lcdDrawString(&dev, 0, 20, "Please turn on RC car", CONFIG_COLOR_TOP_LEFT_TEXT);
+        return;
+    }
     if (counter == 5) {
         counter = 0;
         data_num = total_data / 5;
