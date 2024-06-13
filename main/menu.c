@@ -155,7 +155,7 @@ void menu_tick() {
         case STATE_GAME_SELECTED:
             if (hold && tick_counter > NUM_TICKS) {
                 if (dcy < DCY_LOWER_THRESHOLD) {
-                    menu_state = STATE_JOYSTICK_SELECTED;
+                    menu_state = STATE_CUBE_SELECTED;
                 } else if (dcy > DCY_UPPER_THRESHOLD) {
                     menu_state = STATE_SETTINGS_SELECTED;
                 }

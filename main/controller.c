@@ -109,20 +109,20 @@ void controller_tick_1() {
         uart_send_data("O");
     }
     lcdDrawString(&dev, 0, 0, "Controller", CONFIG_COLOR_TOP_LEFT_TEXT);
-    lcdDrawString(&dev, 0, 10, "Speed: ", WHITE);
-    if (speed == 0) lcdDrawString(&dev, 50, 10, "0", WHITE);
-    else if (speed == 1) lcdDrawString(&dev, 50, 10, "1", WHITE);
-    else if (speed == 2) lcdDrawString(&dev, 50, 10, "2", WHITE);
-    else if (speed == 3) lcdDrawString(&dev, 50, 10, "3", WHITE);
-    else if (speed == 4) lcdDrawString(&dev, 50, 10, "4", WHITE);
-    else if (speed == 5) lcdDrawString(&dev, 50, 10, "5", WHITE);
-    else if (speed == 6) lcdDrawString(&dev, 50, 10, "6", WHITE);
-    lcdDrawString(&dev, 0, 20, "Direction: ", WHITE);
-    if (direction == 0) lcdDrawString(&dev, 60, 20, "NONE", WHITE);
-    else if (direction == 1) lcdDrawString(&dev, 60, 20, "FORWARDS", WHITE);
-    else if (direction == 2) lcdDrawString(&dev, 60, 20, "BACKWARDS", WHITE);
-    else if (direction == 3) lcdDrawString(&dev, 60, 20, "LEFT", WHITE);
-    else if (direction == 4) lcdDrawString(&dev, 60, 20, "RIGHT", WHITE);
+    lcdDrawRoundRect(&dev, 5, 80, LCD_W - 5, 160, 10, BLUE);
+    lcdSetFontSize(&dev, 2);
+    if (speed == 0) lcdDrawString(&dev, 100, 50, "STOPPED", RED);
+    else if (speed == 1) lcdDrawString(&dev, 100, 50, "SLOWEST", GREEN);
+    else if (speed == 2) lcdDrawString(&dev, 100, 50, "SLOWER", GREEN);
+    else if (speed == 3) lcdDrawString(&dev, 100, 50, "SLOW", GREEN);
+    else if (speed == 4) lcdDrawString(&dev, 100, 50, "FAST", ORANGE);
+    else if (speed == 5) lcdDrawString(&dev, 100, 50, "FASTER", ORANGE);
+    else if (speed == 6) lcdDrawString(&dev, 100, 50, "FASTEST", ORANGE);
+    if (direction == 0) lcdDrawString(&dev, 100, 180, "NONE o", WHITE);
+    else if (direction == 1) lcdDrawString(&dev, 100, 180, "FORWARDS ^", WHITE);
+    else if (direction == 2) lcdDrawString(&dev, 100, 180, "BACKWARDS v", WHITE);
+    else if (direction == 3) lcdDrawString(&dev, 100, 180, "LEFT <-", WHITE);
+    else if (direction == 4) lcdDrawString(&dev, 100, 180, "RIGHT ->", WHITE);
 }
 
 void controller_tick_2() {
@@ -141,8 +141,12 @@ void controller_tick_2() {
         counter = 0;
         data_num = total_data / 5;
         ESP_LOGI(TAG, "Data: %d", data_num);
-        sprintf(data_output, "Data: %d", data_num);
+        sprintf(data_output, "%3dcm", data_num);
         total_data = 0;
     }
-    lcdDrawString(&dev, 0, 30, data_output, WHITE);
+    lcdSetFontSize(&dev, 5);
+    if (data_num <= 10) lcdDrawString(&dev, 70, 110, data_output, RED);
+    else if (data_num <= 100) lcdDrawString(&dev, 70, 110, data_output, YELLOW);
+    else lcdDrawString(&dev, 70, 110, data_output, GREEN);
+    lcdSetFontSize(&dev, 1);
 }
